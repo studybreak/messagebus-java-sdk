@@ -92,7 +92,6 @@ public class SimpleHttpClient implements MessageBusClient {
                 client = Client.create(config);
 
                 client.setConnectTimeout(TIMEOUT_SETTING);
-                client.setReadTimeout(TIMEOUT_SETTING);
 
             } catch (final Exception e) {
                 throw new MessageBusException(500, "problem with SSL setup: "
