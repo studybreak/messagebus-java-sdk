@@ -26,7 +26,7 @@ public class MessageBusInfoTest {
     public void testUserAgentCheck() {
         try {
             String ua = Info.getUserAgent();
-            boolean b = ua.matches("^MessageBusAPI:4.1.0-JAVA:\\d+.\\d+.\\d+\\_\\d+$");
+            boolean b = ua.matches("^MessageBusAPI:5.0.0-JAVA:\\d+.\\d+.\\d+\\_\\d+$");
             assertTrue("Retrieved user agent does not match regex", b);
         } catch (final Exception e) {
             e.printStackTrace();

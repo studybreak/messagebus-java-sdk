@@ -83,7 +83,7 @@ public class SimpleHttpClientTest extends TestCase {
             final Object entityToPost = helper.getEntity();
             assertEquals("TESTAPIKEY", helper.getMetaData().get("X-MessageBus-Key").get(0));
             String ua = helper.getMetaData().get("User-Agent").get(0).toString();
-            boolean uaMatches = ua.matches("^MessageBusAPI:4.1.0-JAVA:\\d+.\\d+.\\d+\\_\\d+$");
+            boolean uaMatches = ua.matches("^MessageBusAPI:5.0.0-JAVA:\\d+.\\d+.\\d+\\_\\d+$");
             assertTrue("Retrieved user agent does match regex", uaMatches);
             if (returnClass != expectedReturnClass) {
                 fail("Incorrect class used for return json conversion");
@@ -196,7 +196,7 @@ public class SimpleHttpClientTest extends TestCase {
     }
 
     public void testUserAgent() throws Exception {
-        String userAgent = "^MessageBusAPI:4.1.0-JAVA:\\d+.\\d+.\\d+.*";
+        String userAgent = "^MessageBusAPI:5.0.0-JAVA:\\d+.\\d+.\\d+.*";
         String partialUri = "partial/Uri/";
         mockHttpClient = new SimpleHttpClientMock("TESTAPIKEY", DefaultTestResponse.class, null, null, partialUri);
         String mockUserAgent = mockHttpClient.getUserAgent();
