@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Mail Bypass, Inc.
+ * Copyright (c) 2013 Mail Bypass, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  *
@@ -11,13 +11,11 @@
 package com.messagebus.client;
 
 import com.messagebus.client.impl.DefaultApiClient;
-import com.messagebus.client.impl.DefaultFeedbackClient;
-import com.messagebus.client.impl.DefaultStatsClient;
+import com.messagebus.client.impl.DefaultReportingClient;
 import com.messagebus.client.impl.DefaultTemplatesClient;
-import com.messagebus.client.v4.client.MessageBusApiClient;
-import com.messagebus.client.v4.client.MessageBusFeedbackClient;
-import com.messagebus.client.v4.client.MessageBusStatsClient;
-import com.messagebus.client.v4.client.MessageBusTemplatesClient;
+import com.messagebus.client.v5.client.MessageBusApiClient;
+import com.messagebus.client.v5.client.MessageBusReportingClient;
+import com.messagebus.client.v5.client.MessageBusTemplatesClient;
 
 /**
  * Factory class for returning default instances of Message Bus examples classes
@@ -46,26 +44,6 @@ public class
         return new DefaultApiClient(apiKey, domain);
     }
 
-    /**
-     * Returns a MessageBusStatsClient for getting statistical information about accounts, channels and sessions
-     *
-     * @param apiKey
-     * @return default stats examples
-     */
-    public static MessageBusStatsClient createStatsClient(final String apiKey) {
-        return new DefaultStatsClient(apiKey);
-    }
-
-    /**
-     * Returns a MessageBusStatsClient for getting statistical information about accounts, channels and sessions
-     *
-     * @param apiKey
-     * @param domain
-     * @return default stats examples
-     */
-    public static MessageBusStatsClient createStatsClient(final String apiKey, final String domain) {
-        return new DefaultStatsClient(apiKey, domain);
-    }
 
     /**
      * Returns a MessageBusTemplatesClient for template email sending
@@ -89,24 +67,26 @@ public class
     }
 
     /**
-     * Returns a MessageBusFeedbackClient for getting all message feedback
+     * Returns a MessageBusReportingClient for generating and polling reports
      *
      * @param apiKey
-     * @return default feedback examples
+     * @return default reporting examples
      */
-    public static MessageBusFeedbackClient createFeedbackClient(final String apiKey) {
-        return new DefaultFeedbackClient(apiKey);
+    public static MessageBusReportingClient createReportingClient(final String apiKey) {
+        return new DefaultReportingClient(apiKey);
     }
 
     /**
-     * Returns a MessageBusFeedbackClient for getting all message feedback
+     * Returns a MessageBusTemplatesClient for generating and polling reports
      *
      * @param apiKey
      * @param domain
-     * @return default feedback examples
+     * @return default reporting examples
      */
-    public static MessageBusFeedbackClient createFeedbackClient(final String apiKey, final String domain) {
-        return new DefaultFeedbackClient(apiKey, domain);
+    public static MessageBusReportingClient createReportingClient(final String apiKey, final String domain) {
+        return new DefaultReportingClient(apiKey, domain);
     }
+
+
 
 }

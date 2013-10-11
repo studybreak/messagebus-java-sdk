@@ -17,7 +17,6 @@ public class TemplateResponseResult {
 
     public Map<String, Object> customHeaders;
     public String htmlBody;
-    public List<HashMap<String, Object>> options;
     public String plaintextBody;
     public String returnPath;
     public String sessionKey;
@@ -38,8 +37,6 @@ public class TemplateResponseResult {
 
             @JsonProperty("customHeaders") HashMap<String, Object> customHeaders,
             @JsonProperty("htmlBody") String htmlBody,
-
-            @JsonProperty("options") List<HashMap<String, Object>> options,
             @JsonProperty("plaintextBody") String plaintextBody,
             @JsonProperty("returnPath") String returnPath,
             @JsonProperty("sessionKey") String sessionKey,
@@ -55,7 +52,6 @@ public class TemplateResponseResult {
 
         this.customHeaders = customHeaders;
         this.htmlBody = htmlBody;
-        this.options = options;
         this.plaintextBody = plaintextBody;
         this.returnPath = returnPath;
         this.sessionKey = sessionKey;
@@ -86,9 +82,6 @@ public class TemplateResponseResult {
         return htmlBody;
     }
 
-    public List<HashMap<String, Object>> getOptions() {
-        return options;
-    }
 
     public String getPlaintextBody() {
         return plaintextBody;

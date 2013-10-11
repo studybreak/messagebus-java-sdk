@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Mail Bypass, Inc.
+ * Copyright (c) 2013 Mail Bypass, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  *
@@ -14,10 +14,10 @@ import com.messagebus.client.Info;
 import com.messagebus.client.spi.DefaultResponse;
 import com.messagebus.client.spi.JsonFormatHelper;
 import com.messagebus.client.spi.VersionResponse;
-import com.messagebus.client.v4.client.MessageBusClient;
-import com.messagebus.client.v4.client.MessageBusFeedbackClient;
-import com.messagebus.client.v4.model.MessageBusException;
+import com.messagebus.client.v5.client.MessageBusClient;
+import com.messagebus.client.v5.model.MessageBusException;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -26,11 +26,9 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 
 import javax.ws.rs.core.MultivaluedMap;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Set;
 import java.util.TimeZone;
 
 /**
@@ -38,15 +36,16 @@ import java.util.TimeZone;
  */
 public class SimpleHttpClient implements MessageBusClient {
 
-    private static final String API_DOMAIN = "https://api-v4.messagebus.com";
+    private static final String API_DOMAIN = "https://api.messagebus.com";
 
-    private String path = "api/v4";
+    private String path = "v5";
 
     protected enum HttpMethod {
         DELETE, GET, POST, PUT
     }
 
     private static final Integer TIMEOUT_SETTING = 60000;
+    private static final Integer STREAMING_TIMEOUT_SETTING = 1200000;
     private static final String VERSION = "version";
     private String apiKey = null;
 
@@ -67,7 +66,10 @@ public class SimpleHttpClient implements MessageBusClient {
     }
 
     private String formatRESTUri(final String partialUrl) {
-        return String.format("%s/%s/%s", this.domain, this.path, partialUrl);
+        if (partialUrl.equals("version")){
+            return String.format("%s/%s", this.domain, partialUrl);
+        }else
+            return String.format("%s/%s/%s", this.domain, this.path, partialUrl);
     }
 
     private String formatRESTUri(final String partialUrl, String path) {
@@ -99,9 +101,6 @@ public class SimpleHttpClient implements MessageBusClient {
             }
 
             String uri = this.formatRESTUri(partialUri);
-            if (partialUri.matches("version")) {
-                uri = this.formatRESTUri(partialUri, "api");
-            }
 
             WebResource webResource = client.resource(uri);
 
@@ -140,6 +139,90 @@ public class SimpleHttpClient implements MessageBusClient {
         }
     }
 
+
+    protected boolean streamingRequest(final String partialUri,
+                                       final HttpMethod method,
+                                       final MultivaluedMap<String, String> queryParams,
+                                       final Object requestEntity, final OutputStream os)
+            throws MessageBusException {
+        try {
+            Client client;
+            try {
+                final ClientConfig config = new DefaultClientConfig();
+                client = Client.create(config);
+
+                client.setConnectTimeout(STREAMING_TIMEOUT_SETTING);
+
+            } catch (final Exception e) {
+                throw new MessageBusException(500, "problem with SSL setup: "
+                        + e.getMessage());
+            }
+
+            String uri = this.formatRESTUri(partialUri);
+            if (partialUri.matches("version")) {
+                uri = this.formatRESTUri(partialUri, "api");
+            }
+
+            WebResource webResource = client.resource(uri);
+
+            if (queryParams != null) {
+                webResource = webResource.queryParams(queryParams);
+            }
+            WebResource.Builder builder = webResource.header(
+                    "X-MessageBus-Key", this.apiKey);
+            builder = builder.header("User-Agent", Info.getUserAgent());
+
+            if (requestEntity != null) {
+
+                builder = builder.entity(requestEntity,
+                        "application/json; charset=utf-8");
+            }
+
+            ClientResponse response = builder.get(ClientResponse.class);
+
+            if (response.getStatus() >= 400) {
+                String msg = "Internal Server Error";
+                switch (response.getStatus()) {
+                    case 400:
+                        msg = "Invalid Request";
+                        break;
+                    case 401:
+                        msg = "Unauthorized";
+                        break;
+                    case 402:
+                        msg = "Request Failed";
+                        break;
+                    case 403:
+                        msg = "Forbidden";
+                        break;
+                    case 404:
+                        msg = " Not Found";
+                        break;
+                }
+                throw new MessageBusException(response.getStatus(), msg);
+            }
+
+            InputStream is = response.getEntityInputStream();
+            byte[] buffer = new byte[256];
+            int bytesRead = 0;
+            int totalBytesRead=0;
+            while ((bytesRead = is.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+                totalBytesRead=totalBytesRead+bytesRead;
+            }
+            is.close();
+            if (totalBytesRead > 0)
+                return true;
+            else
+                return false;
+
+        } catch (final IllegalArgumentException e) {
+            throw new MessageBusException(400, e.getCause().getMessage());
+        } catch (final Exception e) {
+            throw new MessageBusException(500, e.getMessage());
+        }
+    }
+
     Object jerseyGet(WebResource webResource, WebResource.Builder builder, final Class returnClass) {
         return builder.get(returnClass);
     }
@@ -165,22 +248,6 @@ public class SimpleHttpClient implements MessageBusClient {
         return String.format("%s %s", versionResponse.getApiName(), versionResponse.getApiVersion());
     }
 
-    MultivaluedMap<String, String> setupFeedbackQueryMap(final Set<MessageBusFeedbackClient.ScopeType> scopeTypes,
-                                                         final Date startDate, final Date endDate) {
-        final MultivaluedMap<String, String> map = setupDateQueryMap(startDate, endDate);
-        map.add("scope", buildScopeString(scopeTypes));
-        return map;
-    }
-
-    private String buildScopeString(final Set<MessageBusFeedbackClient.ScopeType> scopeTypes) {
-        StringBuilder scopeString = new StringBuilder();
-        for (MessageBusFeedbackClient.ScopeType scopeType : scopeTypes) {
-            scopeString.append(scopeType);
-            scopeString.append(",");
-        }
-        scopeString.deleteCharAt(scopeString.length() - 1);
-        return scopeString.toString();
-    }
 
     MultivaluedMap<String, String> setupDateQueryMap(
             final Date startDate, final Date endDate) {

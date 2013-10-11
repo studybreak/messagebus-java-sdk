@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Mail Bypass, Inc.
+ * Copyright (c) 2013 Mail Bypass, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  *
@@ -25,7 +25,6 @@ public class TemplateCreateRequest {
 
     public String htmlBody;
     public String name;
-    public Map<String, String> options;
     public String plaintextBody;
     public String returnPath;
     public String sessionKey;
@@ -46,7 +45,6 @@ public class TemplateCreateRequest {
                                  @JsonProperty("fromName") String fromName,
                                  @JsonProperty("htmlBody") String htmlBody,
                                  @JsonProperty("name") String name,
-                                 @JsonProperty("options") HashMap<String, String> options,
                                  @JsonProperty("plaintextBody") String plaintextBody,
                                  @JsonProperty("returnPath") String returnPath,
                                  @JsonProperty("sessionKey") String sessionKey,
@@ -57,7 +55,6 @@ public class TemplateCreateRequest {
         this.customHeaders = customHeaders;
         this.htmlBody = htmlBody;
         this.name = name;
-        this.options = options;
         this.plaintextBody = plaintextBody;
         this.returnPath = returnPath;
         this.sessionKey = sessionKey;
@@ -90,14 +87,6 @@ public class TemplateCreateRequest {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Map<String, String> getOptions() {
-        return options;
-    }
-
-    public void setOptions(Map<String, String> options) {
-        this.options = options;
     }
 
     public String getPlaintextBody() {

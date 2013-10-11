@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Mail Bypass, Inc.
+ * Copyright (c) 2013 Mail Bypass, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  *
@@ -35,6 +35,7 @@ public class BatchEmailMessageRequestItem {
     private String toEmail = null;
     private String toName = null;
     private String sessionKey = null;
+    private String returnPath = null;
 
     public BatchEmailMessageRequestItem() {
 
@@ -44,6 +45,7 @@ public class BatchEmailMessageRequestItem {
     public BatchEmailMessageRequestItem(@JsonProperty("customHeaders") HashMap<String, String> customHeaders,
                                         @JsonProperty("fromEmail") String fromEmail,
                                         @JsonProperty("fromName") String fromName,
+                                        @JsonProperty("returnPath")String returnPath,
                                         @JsonProperty("htmlBody") String htmlBody,
                                         @JsonProperty("plaintextBody") String plaintextBody,
                                         @JsonProperty("subject") String subject,
@@ -59,6 +61,7 @@ public class BatchEmailMessageRequestItem {
         this.toEmail = toEmail;
         this.toName = toName;
         this.sessionKey = sessionKey;
+        this.returnPath = returnPath;
     }
 
     public Map<String, String> getCustomHeaders() {
@@ -75,6 +78,14 @@ public class BatchEmailMessageRequestItem {
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;
+    }
+
+    public String getReturnPath() {
+        return returnPath;
+    }
+
+    public void setReturnPath(String returnPath) {
+        this.returnPath = returnPath;
     }
 
     public String getFromName() {

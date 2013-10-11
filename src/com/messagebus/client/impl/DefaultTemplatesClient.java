@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Mail Bypass, Inc.
+ * Copyright (c) 2013 Mail Bypass, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  *
@@ -10,8 +10,8 @@
 package com.messagebus.client.impl;
 
 import com.messagebus.client.spi.*;
-import com.messagebus.client.v4.client.MessageBusTemplatesClient;
-import com.messagebus.client.v4.model.MessageBusException;
+import com.messagebus.client.v5.client.MessageBusTemplatesClient;
+import com.messagebus.client.v5.model.MessageBusException;
 
 import java.util.List;
 import java.util.Map;
@@ -23,11 +23,11 @@ import java.util.Map;
  */
 public class DefaultTemplatesClient extends SimpleHttpClient implements MessageBusTemplatesClient {
 
-    private static final String TEMPLATES_DOMAIN = "https://templates-v4-jy01-prod.messagebus.com";
+    private static final String TEMPLATES_DOMAIN = "https://templates.messagebus.com";
 
     private static final String TEMPLATE = "template/%s";
     private static final String TEMPLATES = "templates";
-    private static final String TEMPLATE_SEND = "templates/email/send";
+    private static final String TEMPLATE_SEND = "templates/send";
     private static final String TEMPLATE_VERSION = "templates/version";
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Mail Bypass, Inc.
+ * Copyright (c) 2013 Mail Bypass, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  *
@@ -37,12 +37,11 @@ public class TemplateCreateRequestTest extends TestCase {
         templateCreateRequest.setCustomHeaders(customHeaders);
         templateCreateRequest.setReturnPath("returnPath");
         templateCreateRequest.setSessionKey("DDEE5E70DC3611E1AE283ED96188709B");
-        templateCreateRequest.setOptions(options);
         templateCreateRequest.setName("templateName");
 
         assertEquals("{\"customHeaders\":{\"custom-header-2\":\"custom value 2\",\"custom-header-1\":\"custom value 1\"}," +
                 "\"fromEmail\":\"from1@example.com\",\"fromName\":\"From Name 1\",\"htmlBody\":\"Test Html Body 1\",\"name\":\"templateName\"," +
-                "\"options\":{\"option-2\":\"option value 2\",\"option-1\":\"option value 1\"},\"plaintextBody\":\"Test Plain Text Body 1\"," +
+                "\"plaintextBody\":\"Test Plain Text Body 1\"," +
                 "\"returnPath\":\"returnPath\",\"sessionKey\":\"DDEE5E70DC3611E1AE283ED96188709B\",\"subject\":\"Test Subject 1\"," +
                 "\"toEmail\":\"to1@example.com\",\"toName\":\"To Name 1\"}", JsonFormatHelper.toWireFormat(templateCreateRequest));
 

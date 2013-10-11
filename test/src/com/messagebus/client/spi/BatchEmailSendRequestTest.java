@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Mail Bypass, Inc.
+ * Copyright (c) 2013 Mail Bypass, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  *
@@ -36,6 +36,7 @@ public class BatchEmailSendRequestTest extends TestCase {
         emailMessage1.setPlaintextBody("Test Plain Text Body 1");
         emailMessage1.setHtmlBody("Test Html Body 1");
         emailMessage1.setCustomHeaders(customHeaders1);
+        emailMessage1.setReturnPath("test@test.com");
         // testing unset sessionKey --- should return null
 
         emailMessage2.setToEmail("to2@example.com");
@@ -47,6 +48,7 @@ public class BatchEmailSendRequestTest extends TestCase {
         emailMessage2.setHtmlBody("Test Html Body 2");
         emailMessage2.setCustomHeaders(new HashMap<String, String>());
         emailMessage2.setSessionKey("DDEE5E70DC3611E1AE283ED96188709B");
+        emailMessage2.setReturnPath("test@test.com");
 
         final List<BatchEmailMessageRequestItem> emailList = new ArrayList<BatchEmailMessageRequestItem>();
 
@@ -57,9 +59,9 @@ public class BatchEmailSendRequestTest extends TestCase {
                 emailList);
 
         final String correctJson = "{\"messages\":[{\"customHeaders\":{\"custom-header-2\":\"custom value 2\",\"custom-header-1\":\"custom value 1\"}," +
-                "\"fromEmail\":\"from1@example.com\",\"fromName\":\"From Name 1\",\"htmlBody\":\"Test Html Body 1\",\"plaintextBody\":\"Test Plain Text Body 1\"," +
+                "\"fromEmail\":\"from1@example.com\",\"fromName\":\"From Name 1\",\"returnPath\":\"test@test.com\",\"htmlBody\":\"Test Html Body 1\",\"plaintextBody\":\"Test Plain Text Body 1\"," +
                 "\"subject\":\"Test Subject 1\",\"toEmail\":\"to1@example.com\",\"toName\":\"To Name 1\",\"sessionKey\":null},{\"customHeaders\":{}," +
-                "\"fromEmail\":\"from2@example.com\",\"fromName\":\"From Name 2\",\"htmlBody\":\"Test Html Body 2\",\"plaintextBody\":\"Test Plain Text Body 2\"," +
+                "\"fromEmail\":\"from2@example.com\",\"fromName\":\"From Name 2\",\"returnPath\":\"test@test.com\",\"htmlBody\":\"Test Html Body 2\",\"plaintextBody\":\"Test Plain Text Body 2\"," +
                 "\"subject\":\"Test Subject 2\",\"toEmail\":\"to2@example.com\",\"toName\":\"To Name 2\",\"sessionKey\":\"DDEE5E70DC3611E1AE283ED96188709B\"}]}";
 
         assertEquals(correctJson, JsonFormatHelper.toWireFormat(sendRequest));

@@ -1,10 +1,12 @@
 package com.messagebus.client.spi;
 
 import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.Date;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SessionsCreateResponse extends DefaultResponse {
 
     private String sessionKey;

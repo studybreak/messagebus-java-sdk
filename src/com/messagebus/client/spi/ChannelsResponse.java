@@ -1,11 +1,13 @@
 package com.messagebus.client.spi;
 
 import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.Date;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ChannelsResponse extends DefaultResponse {
 
     private List<ChannelsResponseResult> results;
@@ -17,7 +19,7 @@ public class ChannelsResponse extends DefaultResponse {
             @JsonProperty("statusMessage") final String statusMessage,
             @JsonProperty("statusTime") final Date statusTime,
             @JsonProperty("count") final int count,
-            @JsonProperty("results") final List<ChannelsResponseResult> results) {
+            @JsonProperty("channels") final List<ChannelsResponseResult> results) {
 
         super(statusCode, statusMessage, statusTime);
         this.results = results;

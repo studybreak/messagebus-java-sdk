@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Mail Bypass, Inc.
+ * Copyright (c) 2013 Mail Bypass, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  *
@@ -12,7 +12,6 @@ package com.messagebus.client.impl;
 
 
 import com.messagebus.client.spi.DefaultResponse;
-import com.messagebus.client.v4.client.MessageBusFeedbackClient;
 import com.sun.jersey.api.client.PartialRequestBuilderHelper;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
@@ -80,7 +79,7 @@ public class SimpleHttpClientTest extends TestCase {
                     expectedQueryString.append(valueList.get(0));
                 }
             }
-            assertEquals(String.format("https://api-v4.messagebus.com/api/v4/%s%s", expectedPartialUri, expectedQueryString.toString()), uri.toString());
+            assertEquals(String.format("https://api.messagebus.com/v5/%s%s", expectedPartialUri, expectedQueryString.toString()), uri.toString());
             final Object entityToPost = helper.getEntity();
             assertEquals("TESTAPIKEY", helper.getMetaData().get("X-MessageBus-Key").get(0));
             String ua = helper.getMetaData().get("User-Agent").get(0).toString();
@@ -204,24 +203,6 @@ public class SimpleHttpClientTest extends TestCase {
         assertTrue("Expected " + userAgent + " got " + mockUserAgent, mockUserAgent.matches(userAgent));
     }
 
-    public void testScopeAndDateParams() throws Exception {
-        String partialUri = "partial/Uri/";
-        mockHttpClient = new SimpleHttpClientMock("TESTAPIKEY", DefaultTestResponse.class, null, null, partialUri);
-        final HashSet<MessageBusFeedbackClient.ScopeType> scopeTypes = new HashSet<MessageBusFeedbackClient.ScopeType>();
-        scopeTypes.add(MessageBusFeedbackClient.ScopeType.CLICKS);
 
-        DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
-        Date d1 = df.parse("12-10-2013");
-        Date d2 = df.parse("12-11-2013");
-
-        final MultivaluedMap<String, String> stringStringMultivaluedMap = mockHttpClient.setupFeedbackQueryMap(scopeTypes, d1, d2);
-
-        assertTrue(stringStringMultivaluedMap.containsKey("scope"));
-        final List<String> scopes = stringStringMultivaluedMap.get("scope");
-        assertEquals(scopes.toString(), "[CLICKS]");
-        assertTrue(stringStringMultivaluedMap.containsKey("startDate"));
-        assertTrue(stringStringMultivaluedMap.containsKey("endDate"));
-
-    }
 
 }

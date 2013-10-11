@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Mail Bypass, Inc.
+ * Copyright (c) 2013 Mail Bypass, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  *
@@ -11,8 +11,8 @@
 package com.messagebus.client.impl;
 
 import com.messagebus.client.spi.*;
-import com.messagebus.client.v4.client.MessageBusApiClient;
-import com.messagebus.client.v4.model.MessageBusException;
+import com.messagebus.client.v5.client.MessageBusApiClient;
+import com.messagebus.client.v5.model.MessageBusException;
 
 /**
  *
@@ -23,7 +23,7 @@ public class DefaultApiClient extends SimpleHttpClient implements MessageBusApiC
 
     private static final String SESSIONS = "channel/%s/sessions";
 
-    private static final String SEND_EMAILS = "message/email/send";
+    private static final String SEND_EMAILS = "messages/send";
     private static final String SESSION_RENAME = "channel/%s/session/%s/rename";
     private static final String CHANNELS = "channels";
     private static final String CHANNEL_CONFIG = "channel/%s/config";

@@ -28,7 +28,7 @@ If you have questions not answered by the samples or the online documentation, p
 
     public static void main(String[] args) {
 
-        final ExampleSendMessages exampleSend = new ExampleSendMessages(MessageBusFactory.createApiClient("<YOUR_API_KEY>", "https://api-v4.messagebus.com"));
+        final ExampleSendMessages exampleSend = new ExampleSendMessages(MessageBusFactory.createApiClient("<YOUR_API_KEY>", "https://api.messagebus.com"));
 
         exampleSend.exampleSendMessages();
 
@@ -47,6 +47,7 @@ If you have questions not answered by the samples or the online documentation, p
             final BatchEmailMessageRequestItem messageBusEmail1 = new BatchEmailMessageRequestItem();
 
             messageBusEmail1.setToEmail("bobby@example.com");
+            messageBusEmail1.setReturnPath("bounces@example.com");
             messageBusEmail1.setToName("Bobby Flay");
             messageBusEmail1.setFromEmail("alice@example.com");
             messageBusEmail1.setFromName("Alice Waters");
@@ -61,6 +62,7 @@ If you have questions not answered by the samples or the online documentation, p
             final BatchEmailMessageRequestItem messageBusEmail2 = new BatchEmailMessageRequestItem();
 
             messageBusEmail2.setToEmail("jamie@example.com");
+            messageBusEmail1.setReturnPath("bounces@example.com");
             messageBusEmail2.setToName("Jamie Lauren");
             messageBusEmail2.setFromEmail("alice@example.com");
             messageBusEmail2.setFromName("Alice Waters");
@@ -95,87 +97,126 @@ If you have questions not answered by the samples or the online documentation, p
 
 ####Checking email statistics
 
-    private MessageBusStatsClient messageBusStatsClient;
+    private MessageBusReportingClient messageBusReportingClient;
 
-    public ExampleGetStats(MessageBusStatsClient messageBusStatsClient) {
-        this.messageBusStatsClient = messageBusStatsClient;
+    public SampleCreateStatsReport(MessageBusReportingClient messageBusReportingClient) {
+        this.messageBusReportingClient = messageBusReportingClient;
     }
 
     public static void main(final String[] args) {
 
-        ExampleGetStats exampleGetStats = new ExampleGetStats(MessageBusFactory
-                .createStatsClient("<YOUR_API_KEY>", "https://api-v4.messagebus.com"));
+        SampleCreateStatsReport exampleGetReport = new SampleCreateStatsReport(MessageBusFactory
+                .createReportingClient("<YOUR_API_KEY>", "https://api.messagebus.com"));
+        exampleGetReport.examplePollAndSaveStatsToFile();
 
-        exampleGetStats.exampleRetrieveAccountStats();
     }
 
-    public void exampleRetrieveAccountStats() {
-
-        final Calendar c = Calendar.getInstance();
-        c.setTime(new Date());
-        c.add(Calendar.DATE, -7);
-        final Date startDate = c.getTime();
-        c.setTime(new Date());
-        c.add(Calendar.DATE, -1);
-        final Date endDate = c.getTime();
+    public void examplePollAndSaveStatsToFile() {
+        final String fileName = "testStats.csv";
 
         try {
-            StatsResponse statsResponse = messageBusStatsClient.retrieveStatsForAccount(startDate,
-                    endDate);
+            FileOutputStream fos = new FileOutputStream(fileName);
 
-            System.out.println(String.format("Account level stats from %s to %s:", startDate, endDate));
-            if (statsResponse.getStatusCode() == 200) {
+            final Date endDate = new Date();
+            final Date startDate = new Date(endDate.getTime() - 1000 * 60 * 60 * 24); //24 hour offset in millis
 
-                System.out.println(String.format("Accept count: %d", statsResponse.getSmtp().getAcceptCount()));
-                System.out.println(String.format("Bounce count: %d", statsResponse.getSmtp().getBounceCount()));
-                System.out.println(String.format("Deferral count: %d", statsResponse.getSmtp().getDeferralCount()));
+            final StatsReportRequest statsReportRequest = new StatsReportRequest(startDate, endDate, MessageBusReportingClient.ReportFormat.CSV);
 
+            final ReportCreateResponse reportCreateResponse = messageBusReportingClient.createStatsReport(statsReportRequest);
 
-            } else {
-                System.out.println(String.format("Could not get Stats. Status message: %s", statsResponse.getStatusMessage()));
+            final String reportKey = reportCreateResponse.getReportKey();
+
+            ReportStatusResponse reportStatus = messageBusReportingClient.getReportStatus(reportKey);
+
+            while (!reportStatus.isFinished()) {
+                reportStatus = messageBusReportingClient.getReportStatus(reportKey);
+                try{
+                    Thread.sleep(5000); // sleep 5 sec
+                }catch(Exception e){}
             }
+
+            if (reportStatus.isSuccessful()) {
+                if (messageBusReportingClient.streamReport(reportKey, fos)) {
+                    System.out.println(String.format("Report saved to %s", fileName));
+                } else {
+                    System.out.println(String.format("Unable to stream report for key %s", reportKey));
+                }
+            } else if (reportStatus.isEmpty()) {
+                System.out.println(String.format("No Data Was Found For reportKey %s", reportKey));
+            } else {
+                System.out.println(String.format("Report with key %s returned status %s", reportKey, reportStatus.getReportStatus()));
+            }
+
+
         } catch (MessageBusException e) {
             System.out.println(String.format("Error Message: %s \n \n Exception: %s", e.getStatusMessage(), e));
+        } catch (FileNotFoundException fe) {
+            System.out.println(String.format("Error Message: %s", fe.getMessage()));
         }
     }
 
 #### Checking email feedback data
 
-    private MessageBusFeedbackClient messageBusFeedbackClient;
+    String channelKey= "<YOUR_CHANNEL_KEY>";
+    String sessionKey= "<YOUR_SESSION_KEY>";
 
-    public ExampleGetFeedback(MessageBusFeedbackClient messageBusFeedbackClient) {
-        this.messageBusFeedbackClient = messageBusFeedbackClient;
+    private MessageBusReportingClient messageBusReportingClient;
+
+    public SampleCreateFeedbackReport(MessageBusReportingClient messageBusReportingClient) {
+        this.messageBusReportingClient = messageBusReportingClient;
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
 
-        final ExampleGetFeedback exampleGetFeedback = new ExampleGetFeedback(MessageBusFactory.createFeedbackClient("<YOUR_API_KEY>", "https://api-v4.messagebus.com"));
 
-        exampleGetFeedback.exampleGetAccountFeedback();
+        SampleCreateFeedbackReport exampleGetReport = new SampleCreateFeedbackReport(MessageBusFactory
+                .createReportingClient("<YOUR_API_KEY>", "https://api.messagebus.com"));
+
+        exampleGetReport.examplePollAndSaveFeedbackToFile();
+
     }
 
-    public void exampleGetAccountFeedback() {
+    public void examplePollAndSaveFeedbackToFile() {
+        final String fileName = "testFeedback.csv";
 
         try {
-            final FeedbackResponse feedbackResponse = this.messageBusFeedbackClient.retrieveFeedbackForAccount();
+            FileOutputStream fos = new FileOutputStream(fileName);
 
-            final List<OpenResponseResult> opens = feedbackResponse.getOpens();
+            final Date endDate = new Date();
+            final Date startDate = new Date(endDate.getTime() - 1000 * 60 * 60 * 24); //24 hour offset in millis
 
-            System.out.println("Opens: ");
-            for (OpenResponseResult openResult : opens) {
-                System.out.println(String.format("Email: %s Count: %s Last Event Time: %s ", openResult.getEmail(), openResult.getCount(), openResult.getLastEventTime()));
+            final FeedbackReportRequest feedbackReportRequest = new FeedbackReportRequest(MessageBusReportingClient.FeedbackReportScopeType.BOUNCES, startDate, endDate, channelKey,sessionKey,MessageBusReportingClient.ReportFormat.CSV);
+
+            final ReportCreateResponse reportCreateResponse = messageBusReportingClient.createFeedbackReport(feedbackReportRequest);
+
+            final String reportKey = reportCreateResponse.getReportKey();
+
+            ReportStatusResponse reportStatus = messageBusReportingClient.getReportStatus(reportKey);
+
+            while (!reportStatus.isFinished()) {
+                reportStatus = messageBusReportingClient.getReportStatus(reportKey);
+                try{
+                    Thread.sleep(5000); // sleep 5 sec
+                }catch(Exception e){}
             }
 
-            final List<BouncesResponseResult> bounces = feedbackResponse.getBounces();
-
-            System.out.println("Bounces: ");
-            for (BouncesResponseResult bounceResult : bounces) {
-                System.out.println(String.format("Email: %s Count: %s Last Event Time: %s ", bounceResult.getEmail(), bounceResult.getCount(), bounceResult.getLastEventTime()));
+            if (reportStatus.isSuccessful()) {
+                if (messageBusReportingClient.streamReport(reportKey, fos)) {
+                    System.out.println(String.format("Report saved to %s", fileName));
+                } else {
+                    System.out.println(String.format("Unable to stream report for key %s", reportKey));
+                }
+            } else if (reportStatus.isEmpty()) {
+                System.out.println(String.format("No Data Was Found For reportKey %s", reportKey));
+            } else {
+                System.out.println(String.format("Report with key %s returned status %s", reportKey, reportStatus.getReportStatus()));
             }
 
 
         } catch (MessageBusException e) {
             System.out.println(String.format("Error Message: %s \n \n Exception: %s", e.getStatusMessage(), e));
+        } catch (FileNotFoundException fe) {
+            System.out.println(String.format("Error Message: %s", fe.getMessage()));
         }
     }
 
