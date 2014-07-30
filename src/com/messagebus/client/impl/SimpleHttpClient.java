@@ -44,7 +44,8 @@ public class SimpleHttpClient implements MessageBusClient {
         DELETE, GET, POST, PUT
     }
 
-    private static final Integer TIMEOUT_SETTING = 60000;
+    private static final Integer TIMEOUT_SETTING = 5000;
+    private static final Integer READ_TIMEOUT_SETTING = 1000;
     private static final Integer STREAMING_TIMEOUT_SETTING = 1200000;
     private static final String VERSION = "version";
     private String apiKey = null;
@@ -94,6 +95,7 @@ public class SimpleHttpClient implements MessageBusClient {
                 client = Client.create(config);
 
                 client.setConnectTimeout(TIMEOUT_SETTING);
+                client.setReadTimeout(READ_TIMEOUT_SETTING);
 
             } catch (final Exception e) {
                 throw new MessageBusException(500, "problem with SSL setup: "
